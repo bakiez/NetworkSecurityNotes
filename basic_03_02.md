@@ -1,0 +1,90 @@
+## Switches
+RAM is way too slow, that's why we have CAM, which can do lookups in constant
+time. However, CAM is very expensive, so switches usually do not have space
+for more than 128.000 ARPs.
+
+ARP is ~40 bytes, at a slow connection of 10Mbit/s, you can do about 25.000 ARPs
+per second, so you can fill the ARP table within six seconds.
+
+Then when the switch gets a new packet, that address is not in the ARP table
+anymore (because you filled it). Then, what to do?
+- Discard the package: no data leaks, but data loss instead
+- Broadcast the package: no data loss, but data leaks instead.
+
+In case of an empty switch configuration, you cannot discard because then you
+would never be able to fill the ARP table. Therefore broadcasting is the way
+to go.
+
+What to do against this attack, when it only takes a few seconds?
+- Block ARP requests after a certain threshold
+- Check ARP bursts
+
+When something is not used for 5 minutes in FIB, it is deleted automatically.
+
+### Port security
+Limit the number of devices behind each port.
+- Rate limits
+- Mac filtering, it is very bad for access control (MAC spoofing) but works
+excellently against ARP attacks.
+However, doing port filtering between two switches can cause chaos because then
+it is normal for there to be tens of thousands of ARP messages.
+- Do classification by ports: differentiate between trunk port and access ports.
+Depending on the kind of port, do different filtering.
+
+## VLAN 802.1Q
+Separates the physical infrastructure into virtually separate LANs.
+A device can also be part of multiple memberships, and also when a device is not
+a part of a certain membership, you can configure it such that it will also not
+receive information for that membership.
+
+Issues:
+- Switch spoofing.
+    - STP
+    - (D)DOS (The CPU has to handle all control messages, so taking down a
+    switch with control messages is fairly easy)
+    - Countermeasures: limit what can come in.
+- Double tagging attack: look into this at home!
+    - Root problem: VLAN1 is used when there is no tag, and is also used for
+    VLAN1 (if I understand it correctly..).
+    - Countermeasures:
+        - disallow double tagging
+            - problem: When sending something over a VLAN within your network
+            going from Rotterdam to Amsterdam, the ISP will add a second VLAN
+            tag to separate your traffic from that of your competitor.
+        - disallow non-tagged packets: configure the switches to add a tag
+        'VLAN $n' when a pc on VLAN $n sends a packet without a tag.
+        - disable the unused ports and move to a non-default VLAN id.
+- Multiple logical VLANs are still on the same hardware. When one VLAN
+misbehaves (e.g. claims all bandwidth) all VLANs notice this. There is still
+physical entanglement.
+
+## WIFI 802.11
+- __Independent Basic Service Set (IBSS):__  everyone talks to everyone without a
+central access point
+- __Infrastructure BSS:__ every one talks to everyone through a common central
+access point (Service Set IDentification)
+- __Extended Service Set:__ multiple access points, such as eduroam at the TU.
+These all share the same SSID
+
+The first WIFI standard had a system callend Open System Authentication (OSA),
+which is a euphemism, because there is no authentication in an open system.
+They already knew that this could not compete with ethernet, because ethernet
+has access control by needing a physical cable. Very soon verification was added
+with the protocol Wired Equivalent Privacy (WEP).
+
+### Problems
+#### Autoconnect
+__Problem:__ Example for wifi-in-de-trein: when you autoconnect to a certain SSID, an
+attacker can broadcast with that SSID. The only thing he has to do to make
+you connect to him instead of the real wifi-in-de-trein is to broadcast a
+stronger signal. Which obviously is trivial.
+
+__Solutions:__ Rogue access point detection by checking if there are multiple
+access points with the same SSID. But what to do when you find one?
+- Find out where they are before taking out the torches and the pitch forks.
+- Increase own signal power, and try to win this somehow
+- Third one is apparently most important, did not understand, see book. Is about
+reacting and making sure no further compromises are taking place. See
+the MARRIOT TO PAY 600.000 TO RESOLVE WIFI-BLOCKING INVESTIGATION, because
+apparently this is the technique.
+
