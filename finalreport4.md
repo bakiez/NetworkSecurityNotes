@@ -77,7 +77,7 @@ the different types of stakeholders, systems or organisations it depends on and
 interacts with. Ultimately, it helps to get an overview of what a system does 
 (should) or does not (should not) do. 
 
-![image](./context-view_goede.png)
+![image](context-view_goede.png)
 Figure 1. Context view 
 
 In the diagram in Figure 1, three kinds of users are indicated. First there are 
